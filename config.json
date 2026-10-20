@@ -1,0 +1,13 @@
+{
+  "market": "US",
+  "missing_bar_policy": "quarantine_empty",
+  "universe_label": "Fixed US stock sample for database workflow; not historical index constituents",
+  "tickers": ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "JPM", "JNJ", "XOM", "PG"],
+  "start": "2019-01-01",
+  "end": null,
+  "raw_database": "data/raw_market.sqlite",
+  "calculated_database": "data/calculated_market.sqlite",
+  "ranking_window": 3,
+  "min_stocks": 3,
+  "group_weights": {"momentum": 0.30, "reversal": 0.10, "risk": 0.40, "liquidity": 0.20}
+}

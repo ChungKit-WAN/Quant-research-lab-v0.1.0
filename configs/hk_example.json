@@ -1,0 +1,14 @@
+{
+  "universe_label": "Public-data fixed HK stock sample; not historical HSCI constituents",
+  "tickers": ["0002.HK", "0003.HK", "0005.HK", "0011.HK", "0016.HK", "0388.HK", "0700.HK", "0939.HK", "0941.HK", "1299.HK"],
+  "start": "2019-01-01",
+  "end": null,
+  "ranking_window": 3,
+  "min_stocks": 3,
+  "group_weights": {
+    "momentum": 0.30,
+    "reversal": 0.10,
+    "risk": 0.40,
+    "liquidity": 0.20
+  }
+}

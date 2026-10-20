@@ -1,0 +1,9 @@
+{
+  "tickers": ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "JPM", "JNJ", "XOM", "PG"],
+  "lookback": 504,
+  "research_start": "2021-01-01",
+  "holdout_start": "2024-01-01",
+  "cost_bps": 5.0,
+  "max_weight": 0.25,
+  "initial_cash": 1.0
+}
