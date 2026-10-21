@@ -50,6 +50,15 @@ def parser():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--version", action="version", version=__version__)
     commands = p.add_subparsers(dest="command", required=True)
+    refresh = commands.add_parser("refresh", help="Download current prices and generate all v0.11 sector/research reports")
+    refresh.add_argument("--config", type=Path, help="Rolling-window and 11-sector settings; defaults to configs/refresh.json")
+    refresh.add_argument("--output", type=Path, help="Report root; each run creates a new timestamped subdirectory")
+    refresh.add_argument("--data-dir", type=Path, help="Directory for append-only raw and calculated SQLite databases")
+    refresh.add_argument("--as-of", help="Optional historical cutoff YYYY-MM-DD; otherwise current time")
+    source = refresh.add_mutually_exclusive_group()
+    source.add_argument("--prices", type=Path, help="Offline canonical CSV including all configured stocks and ETFs")
+    source.add_argument("--demo", action="store_true", help="Explicit synthetic offline demonstration")
+    refresh.add_argument("--open", action="store_true", help="Open the successfully generated report")
     for command in ("demo", "run"):
         sub = commands.add_parser(command, help="Synthetic offline demonstration" if command == "demo" else "Run on a supplied CSV")
         sub.add_argument("--family", choices=("etf", "stocks"), default="etf")
@@ -65,6 +74,10 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "refresh":
+            from .refresh import refresh
+            refresh(args)
+            return 0
         if args.output.exists() and (not args.output.is_dir() or any(args.output.iterdir())):
             raise ValueError("Output must be new or empty; choose another --output to preserve earlier runs")
         config = MonthlyConfig(**json.loads(args.config.read_text(encoding="utf-8-sig"))) if args.config else (
@@ -95,7 +108,7 @@ def main(argv=None):
         print(f"Report: {report.resolve()}")
         print(f"Strategies: {', '.join(result['strategies'])}; monthly events: {len(result['schedule'])}")
         return 0
-    except (ValueError, TypeError, KeyError, OSError) as exc:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 

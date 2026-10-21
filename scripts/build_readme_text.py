@@ -1,4 +1,4 @@
-"""Build readable plain-text editions of the Chinese and English READMEs."""
+"""Build English-first plain-text documentation and a Chinese companion."""
 
 from pathlib import Path
 import re
@@ -37,7 +37,7 @@ DIAGRAMS = {
 5. Feed both branches into the common target-weight interface
 6. Apply the shared positions, cash, and cost ledger
 7. Compute daily NAV and period metrics
-8. Export separate Chinese/English reports, CSV, JSON, and the hash manifest""",
+8. Export English reports with Chinese companions, CSV, JSON, and the hash manifest""",
         """Signal and execution timing:
 1. Month-end close t: use historical information through t to set target weights.
 2. Before the execution close: old holdings earn the pre-trade returns.
@@ -71,8 +71,9 @@ def to_plain_text(markdown: str, language: str) -> str:
 
 def main() -> None:
     for language, source, target in (
-        ("zh", "README.md", "readme.txt"),
+        ("en", "README.md", "readme.txt"),
         ("en", "README_EN.md", "readme_en.txt"),
+        ("zh", "README_ZH.md", "readme_zh.txt"),
     ):
         text = to_plain_text((ROOT / source).read_text(encoding="utf-8"), language)
         (ROOT / target).write_text(text, encoding="utf-8")

@@ -1,196 +1,213 @@
-Quant Research Lab · 量化研究与回测框架
+Quant Research Lab
 
-将行业 ETF 风险配置与个股因子选股放进同一套月度研究框架。
+A shared monthly research framework for sector ETF allocation and stock-factor selection.
 
-本项目由四位成员共同研发。
+Developed collaboratively by a four-member team.
 
-项目研究两个问题：协方差估计方法如何影响行业 ETF 配置，以及价格／成交量因子排名如何影响个股组合。两类策略使用同一套调仓、成本与净值计算口径，便于核对方法差异。工程可复现性与策略预测能力分别验证。
+We study how covariance estimation affects sector ETF allocation and how price/volume factor rankings affect stock portfolios. Both strategy families use the same rebalancing, transaction-cost, and portfolio-accounting conventions, making methodological differences easier to examine. Engineering reproducibility and predictive performance are evaluated separately.
 
-当前版本：v0.1.0 本地候选版本。v1.0 日度、v2.0 小时级、v3.0 AI 分钟／秒级能力见版本路线 (docs/VERSION_ROADMAP_ZH.md)，不属于当前已实现功能。
+Current version: v0.11 (package version 0.11.0). This includes the research-validation milestone previously discussed as v0.1.1, eleven sector pages and portable refresh. Daily decisions in v1.0, hourly decisions in v2.0, and AI-assisted minute/second decisions in v3.0 remain future work in the version roadmap (docs/VERSION_ROADMAP.md).
 
-语言：中文 (README.md) · English (README_EN.md)
+One-click reports on a new computer
 
-阅读入口：中文纯文字版 (readme.txt) · 方法与读图说明 (docs/METHODOLOGY.md) · 因子目录 (docs/FACTOR_CATALOG.md) · 验证记录 (docs/VALIDATION.md) · 版本路线 (docs/VERSION_ROADMAP_ZH.md) · 上传指南 (docs/GITHUB_UPLOAD_ZH.md)
+English is the primary language for the interface, reports, code identifiers, CLI messages and documentation. Chinese companion reports remain available from the language switch. On the overview, ETF backtest or stock backtest page, click an ETF such as XLK to open its sector stock rankings. The linked page shows the configured research sample; it does not claim to contain the fund’s complete or historical holdings.
 
-当前范围
+On Windows, extract the source bundle and double-click START_V011.cmd. It verifies the bootstrap download, installs project-local Python and dependencies, downloads current prices, recalculates all reports, and opens the result. It does not depend on the original computer's environment. Internet access to the official software sources and Yahoo is required; errors retain logs and never count as a successful refresh. macOS/Linux have bash START_V011.sh, authored but not tested on those operating systems.
 
-| 策略族 | 输入与方法 | 共用能力 |
-| 行业 ETF | 固定 11 只行业 ETF；等权、样本协方差最小方差、常相关收缩最小方差 | 交易日校验、月末信号、下一交易日收盘执行、持仓／现金／交易成本账本、日度净值与指标 |
-| 个股 | 日度 OHLCV 与复权收盘价；价格／成交量因子排名，选取排名靠前股票并等权配置 | 复用 ETF 核心的月度调度与组合记账，统一命令行入口与报告输出 |
+- Overview and eleven sector pages, with five editable sample stocks per sector (55 total). This is not the whole market or historical index membership.
+- All 100 factor definitions, formulas, directions and status fields are visible. The 65 price/volume factors have calculated values; 35 financial factors remain unavailable pending point-in-time fundamentals. Sort any metric ascending or descending; missing values are always last and unranked. Display sorting does not change the strategy.
+- English dashboards with Chinese companions, ETF/stock backtests and validation reports, with CSV/JSON exports. All computed performance metrics and asset weight statistics appear in the backtest reports.
+- Each launch resolves the clock again: five research years, three earlier warmup years and a trailing 24-month chronological holdout. Only completed New York sessions plus a two-hour data-source buffer are used; rankings use fully completed exchange-calendar months.
+- Nine predefined experiments cover 5/10/20 bp costs, holdings count, ranking windows and removal of each factor group's score contribution. Every success and failure is saved. A chronological holdout is not certified unseen data.
 
-ETF 比较三种策略：equal_weight、sample_min_variance、shrinkage_min_variance。默认池为 XLB, XLC, XLE, XLF, XLI, XLK, XLP, XLRE, XLU, XLV, XLY。
+Edit configs/refresh.json to change the sample and windows. Each run is preserved in outputs/v011/runs/<run-id>/; outputs/v011/report.html points to the latest fully successful run. Raw source tables, SQLite batches, price samples, calendar coverage, experiment plans and SHA-256 hashes are retained. This downloads prices and generates research reports; it does not download company annual reports or SEC filing text.
 
-个股比较 equal_weight（整个配置池等权）与 multifactor_top_n（排名前 N 只等权）。默认池为 AAPL, MSFT, GOOGL, AMZN, NVDA, META, JPM, JNJ, XOM, PG，属于固定研究池，并非历史指数成分。两者均按月调仓并收取费用。
+With Python installed, run python -m quant_research refresh --open. Optional --as-of YYYY-MM-DD reproduces a historical cutoff; omitting it uses the current clock. Explicit offline demonstrations use refresh --demo --output outputs/v011_demo and are labelled synthetic. refresh --prices path.csv requires all configured stocks and eleven ETFs. See the portable guide (docs/PORTABLE_V011.md).
 
-个股指标目录有 100 个候选，其中 65 个已实现：动量 20、反转 10、风险 15、流动性 20。价值 15、质量 10、成长 10 合计 35 个仍缺少具有历史可用时间的财务数据；它们不是已完成的因子，也不会用零替代。详见指标目录 (docs/FACTOR_CATALOG.md)。指标方向和分组权重是待检验假设，数量不代表预测能力。
+Language: English (primary) · 中文辅助 (README_ZH.md)
 
-个股默认流程：65 个因子全部有效 → 调整方向并计算横截面百分位 → 组内平均 → 按动量 30%、反转 10%、风险 40%、流动性 20% 加权 → 平均连续 3 个月的排名百分位 → 重排后取前 4 只等权。最终并列按股票代码升序处理；公式和筛选图见方法说明 (docs/METHODOLOGY.md)。
+Reading guide: Quick start (START_HERE.md) · English plain text (readme.txt) · Methodology (docs/METHODOLOGY.md) · Factor catalog (docs/FACTOR_CATALOG.md) · Validation (docs/VALIDATION.md) · Roadmap (docs/VERSION_ROADMAP.md) · GitHub upgrade guide (docs/GITHUB_UPDATE_V011.md)
 
-“月计算”指每月产生一次交易决策；日度数据用于估计风险和记录持仓变化。账本使用复权价格对应的合成份额，包含买卖费用和首次建仓成本，不是经独立认证的原始股数与现金分红账本。
+Implemented scope
 
-统一框架流程
+| Strategy family | Inputs and methods | Shared capabilities |
+| Sector ETFs | A fixed universe of 11 sector ETFs; equal weight, sample-covariance minimum variance, and constant-correlation shrinkage minimum variance | Session validation, month-end signals, execution at the next session's close, positions/cash/cost ledger, daily NAV, and performance metrics |
+| Stocks | Daily OHLCV and adjusted close; price/volume factor ranking followed by equal weighting of the highest-ranked stocks | The ETF core's monthly schedule and portfolio accounting, a unified command-line interface, and report exports |
 
-统一框架流程：
-1. CSV 行情或合成演示
-2. 校验字段、标的及交易日
-3. 生成月末信号与下一交易日执行计划
-4. 分别生成目标权重：
-   - ETF：收益窗口与协方差估计 → 等权及两种最小方差配置
-   - 个股：65 因子与连续月排名 → 全池等权及 Top-N 等权
-5. 汇入统一目标权重接口
-6. 共用持仓、现金及费用账本
-7. 计算日度净值与分期指标
-8. 输出独立中文／英文报告、CSV、JSON 及哈希清单
+The ETF family compares equal_weight, sample_min_variance, and shrinkage_min_variance. Its default universe is XLB, XLC, XLE, XLF, XLI, XLK, XLP, XLRE, XLU, XLV, XLY.
 
-两条研究分支在目标权重处汇合，之后由 evaluate_targets 使用相同的执行与记账逻辑。图中的月度调度不表示每月只读取一条价格。
+The stock family compares equal_weight across the configured universe with multifactor_top_n, which equally weights the top N stocks. The v0.11 refresh uses 55 sample stocks. The older demo/run --family stocks keeps the ten-stock example AAPL, MSFT, GOOGL, AMZN, NVDA, META, JPM, JNJ, XOM, PG. These are fixed research samples, not historical index membership. Both strategies rebalance monthly and incur transaction costs. The fixed dates in the manual configurations below apply to demo/run; refresh derives dates from its rolling-window settings.
 
-安装与离线演示
+The factor catalog contains 100 candidates, of which 65 are implemented: 20 momentum, 10 reversal, 15 risk, and 20 liquidity factors. The remaining 35 candidates—15 value, 10 quality, and 10 growth factors—require financial data with historical availability timestamps. They are not implemented and are not replaced with zeros. See the factor catalog (docs/FACTOR_CATALOG.md). Factor directions and group weights are hypotheses to test; the number of factors does not establish predictive value.
 
-需要 Python 3.11+；本地验证和 CI 配置使用 Python 3.13。首次安装依赖可能联网，安装完成后的 demo 无需下载行情或提供行情账户。
+The default stock pipeline requires all 65 factors to be valid, adjusts their directions, computes cross-sectional percentiles, averages within groups, and combines momentum/reversal/risk/liquidity with weights of 30%/10%/40%/20%. It then averages ranking percentiles over three consecutive months, ranks again, and equally weights the top four stocks. Final ties are broken by ascending ticker. Formulas and the selection diagram are in the methodology (docs/METHODOLOGY.md).
 
-Windows PowerShell，在项目根目录运行；下列写法无需激活脚本：
+“Monthly” describes the decision frequency. Daily observations support risk estimation and portfolio accounting. The ledger holds synthetic fractional units based on adjusted prices and includes purchase, sale, and initial-entry costs. It is not an independently certified ledger of raw share counts and cash dividends.
+
+Shared workflow
+
+Shared workflow:
+1. Price CSV or synthetic demo
+2. Validate fields, universe, and sessions
+3. Build month-end signals and the next-session execution schedule
+4. Generate target weights in two branches:
+   - ETFs: return window and covariance estimates → equal weight and two minimum-variance methods
+   - Stocks: 65 factors and consecutive monthly rankings → universe equal weight and Top-N
+5. Feed both branches into the common target-weight interface
+6. Apply the shared positions, cash, and cost ledger
+7. Compute daily NAV and period metrics
+8. Export English reports with Chinese companions, CSV, JSON, and the hash manifest
+
+Both research branches feed target weights into evaluate_targets, sharing execution and accounting. Monthly decisions still use daily observations.
+
+Quick start
+
+Python 3.11+ is required; local validation and the CI configuration use Python 3.13. Initial dependency installation may require internet access. After installation, demos need neither market-data downloads nor a market-data account.
+
+Run these commands from the project root in Windows PowerShell. Activation scripts are not required:
 
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install .
 .\.venv\Scripts\python.exe -m quant_research demo --output outputs/demo
 .\.venv\Scripts\python.exe -m quant_research demo --family stocks --output outputs/stock_demo
 
-macOS／Linux：
+On macOS/Linux:
 
 python3 -m venv .venv
 .venv/bin/python -m pip install .
 .venv/bin/python -m quant_research demo --output outputs/demo
 .venv/bin/python -m quant_research demo --family stocks --output outputs/stock_demo
 
-下文的 python 指这个已安装依赖的虚拟环境解释器；也可继续使用上面的完整路径。激活环境后，还可使用 quant-research 命令替代 python -m quant_research。
+In later examples, python means the interpreter in this environment. You can keep using its full path. After activating the environment, quant-research can replace python -m quant_research.
 
-两个演示均在本地生成确定性合成行情。输出位于指定目录；用浏览器打开命令打印的 report.html 路径即可查看。输出目录必须不存在或为空，以保留先前实验。每个 demo 附带 demo_prices.csv，可用 run --prices 重跑；这些文件仍然是合成数据。合成演示用于检查程序链路，其净值和收益不构成市场表现、策略有效性或投资回报证据。
+Both demos generate deterministic synthetic prices locally. Open the printed report.html path in a browser to view the results. The output directory must be new or empty to preserve earlier experiments. Each demo saves demo_prices.csv, which can be passed to run --prices; it remains synthetic data. Synthetic results validate the software pipeline and are not evidence of market performance, strategy effectiveness, or investment returns.
 
-统一入口分别生成中文报告 report_zh.html 与英文报告 report_en.html，涵盖标题、图表、表格、指标说明、方法约定及证据边界。report.html 是中英语言选择入口，两份报告共用同一份计算结果；CSV 与 JSON 的字段名保留英文，便于程序读取。
+The unified interface generates a Chinese report, report_zh.html, and an English report, report_en.html, with localized headings, charts, tables, metric explanations, methodology, and evidence limitations. report.html opens the English report by default; use the language link to switch to Chinese. Both reports use the same computed results; CSV and JSON field names remain in English for programmatic use.
 
-已验证 Windows／Python 3.13 的完整依赖快照见 requirements-lock-py313-windows.txt。需要固定这一环境时，先 python -m pip install -r requirements-lock-py313-windows.txt，再 python -m pip install . --no-deps。其他系统需重新验证；源码还支持上面的常规安装方式。
+The validated Windows/Python 3.13 dependency snapshot is in requirements-lock-py313-windows.txt. To reproduce that environment, run python -m pip install -r requirements-lock-py313-windows.txt, then python -m pip install . --no-deps. Other platforms require their own validation. The standard installation above is also supported.
 
-使用自己的行情
+Bring your own data
 
-run 读取已有 CSV，不自动下载真实行情。请自行取得具有使用权限且口径一致的数据；旧版下载与快照流水线是单独入口。
+run reads an existing CSV and does not download market data. Obtain consistently defined data that you have permission to use. The legacy download and snapshot pipeline has a separate entry point.
 
-ETF 长表 CSV 的必需字段为 date,ticker,adj_close，日期采用 YYYY-MM-DD。例如：
+ETF input is a long-form CSV with required columns date,ticker,adj_close; dates use YYYY-MM-DD. For example:
 
 date,ticker,adj_close
 2020-12-30,XLB,70.12
 2020-12-30,XLC,65.87
 
-此片段仅说明格式，不能直接运行完整回测。输入标的须与配置完全一致，每个标的须覆盖输入区间内全部 XNYS 常规交易日；每个日期／标的只能有一行。默认需要截至首个信号日至少 505 个价格点，才能形成 504 个收益观察值。
+This fragment illustrates the format only and is insufficient for a backtest. Input tickers must match the configuration exactly, with one row per date/ticker and observations for every regular XNYS session across the input interval. By default, at least 505 price observations through the initial signal date are needed to form 504 return observations.
 
 python -m quant_research run --family etf --prices prices.csv --config configs/sector_monthly.json --output outputs/etf
 python -m quant_research run --family stocks --prices stock_prices.csv --config configs/stock_monthly.json --top-n 4 --ranking-window 3 --output outputs/stocks
 
-个股 CSV 的必需字段为 date,ticker,open,high,low,close,adj_close,volume。价格必须有效，成交量不得为负；不要用填充或复制价格掩盖缺失交易日。统一回测入口目前采用 XNYS 常规交易日历，其中 ETF 使用它作为交易日代理。香港市场旧版排名入口保留在 rank_report.py，不应直接套用此 US 回测日历。
+Stock input requires date,ticker,open,high,low,close,adj_close,volume. Prices must be valid and volume must be nonnegative. Do not conceal missing sessions with filled or copied prices. The unified backtest uses the regular XNYS session calendar, including as a session proxy for ETFs. The legacy Hong Kong ranking entry point remains in rank_report.py; this US backtest calendar should not be applied directly to that market.
 
-两类配置见 ETF 配置 (configs/sector_monthly.json)和个股配置 (configs/stock_monthly.json)。根目录 config.json 属于旧流水线，不用于统一回测命令。
+See the ETF configuration (configs/sector_monthly.json) and stock configuration (configs/stock_monthly.json). The root-level config.json belongs to the legacy pipeline and is not used by the unified backtest commands.
 
-| 参数 | 默认值 | 含义与约束 |
-| tickers | 上述 ETF／个股池 | 至少 2 个不重复标的，必须与 CSV 完全匹配 |
-| lookback | 504 | 收益观察数，须大于标的数；个股还受独立的因子预热期和连续排名月份限制 |
-| research_start | 2021-01-01 | 必须为日历月第一天；首个信号来自上个月最后交易日 |
-| holdout_start | 2024-01-01 | 必须晚于研究起点；仅切分报告区间，不自动构成未见测试集 |
-| cost_bps | 5.0 | 两类策略均对买入与卖出收取 5 bp，即单边名义金额的 0.05% |
-| max_weight | 0.25 | 调仓目标的单标的上限；须介于 1 / 标的数 与 1 之间 |
-| initial_cash | 1.0 | 正数初始资金，默认用于标准化展示 |
-| --top-n | 4 | 仅个股；不超过标的数，且 1 / top_n <= max_weight |
-| --ranking-window | 3 | 仅个股；至少 1 个连续有效月份，包含当前信号月 |
+| Parameter | Default | Meaning and constraint |
+| tickers | ETF or stock universe listed above | At least two unique tickers; must match the CSV exactly |
+| lookback | 504 | Number of return observations; must exceed the asset count. Stocks also require their own factor warm-up periods and consecutive ranking months |
+| research_start | 2021-01-01 | Must be the first calendar day of a month; the initial signal uses the previous month's last session |
+| holdout_start | 2024-01-01 | Must follow the research start; splits report periods but does not establish an unseen test set |
+| cost_bps | 5.0 | Both families charge 5 bp on purchases and sales: 0.05% of each side's notional |
+| max_weight | 0.25 | Per-asset target-weight cap; must be between 1 / asset_count and 1 |
+| initial_cash | 1.0 | Positive starting capital; the default supports normalized presentation |
+| --top-n | 4 | Stocks only; no greater than the universe size, with 1 / top_n <= max_weight |
+| --ranking-window | 3 | Stocks only; at least one consecutive valid month, including the current signal month |
 
-个股组权重目前可在 Python 接口传入，统一 CLI 尚无对应选项。修改公共 lookback 不会缩短各因子的实际计算窗口。
+Stock group weights can currently be supplied through the Python interface; the unified CLI has no corresponding option. Changing the shared lookback does not shorten the calculation windows of individual factors.
 
-信号与记账时序
+Signal and execution timing
 
-信号与记账时序：
-1. t 月末收盘：仅使用截至 t 的历史数据，计算目标权重。
-2. 执行收盘前：旧持仓承担此段收益。
-3. 下一交易日收盘：调仓并支付交易费用。
-4. 执行收盘之后：新持仓开始获得收益。
-5. 后续交易日：逐日估值，直到下一次调仓。
+Signal and execution timing:
+1. Month-end close t: use historical information through t to set target weights.
+2. Before the execution close: old holdings earn the pre-trade returns.
+3. At the next session's close: rebalance and pay transaction costs.
+4. After the execution close: new holdings begin to earn returns.
+5. On subsequent sessions: mark positions to market until the next rebalance.
 
-首次建仓前全部为现金，现金收益为 0，因此首个执行日只产生建仓费用，没有新持仓的隔夜收益。图中的“下一交易日”不一定是下一日历日。
+Before the first trade, the portfolio holds cash with zero interest. The initial execution day incurs entry costs only; new holdings receive no pre-execution return. The next trading session need not be the next calendar day.
 
-- 月末收盘后计算信号，下一交易日收盘执行；新持仓仅获得执行收盘之后的收益。最后一个信号若没有样本内的执行日，不产生交易。
-- 策略仅做多，目标权重之和为 1，允许合成份额的小数持仓。仓位上限约束调仓目标；持仓价格变化可能让实际权重随后偏离。
-- 两类策略默认每次买入或卖出收取名义金额的 5 bp，包含首次建仓。费用通过自融资交易支付，现金收益假设为 0。
-- 研究区间切分不重置持仓或净值，样本末尾不强制平仓；费用、收益和风险指标应在同一口径下比较。
-- 复权价格已包含提供商的调整效果，不再重复应用分红或拆股。公开数据历史修订与信息可用时间仍需单独核验。
+- Signals are computed after month-end close and executed at the next session's close. New positions receive only subsequent returns. A final signal without an execution session inside the sample produces no trade.
+- Strategies are long-only, target weights sum to one, and synthetic fractional units are permitted. Weight caps apply to rebalancing targets; price drift can move actual weights beyond those targets.
+- Both families charge 5 bp by default on each purchase or sale, including the initial entry. Trades pay their own costs through self-financing accounting. Cash earns zero interest.
+- Report-period splits do not reset positions or NAV, and the final sample date does not force liquidation. Compare costs, returns, and risk under consistent conventions.
+- Adjusted prices already reflect the provider's adjustments, so dividends and splits are not applied again. Historical data revisions and information-availability timestamps still need separate checks.
 
-费用公式、最小方差目标、排名公式及指标符号见方法与读图说明 (docs/METHODOLOGY.md)。
+See the methodology (docs/METHODOLOGY.md) for the cost equation, minimum-variance objective, ranking formulas, and metric sign conventions.
 
-输出与结果阅读
+Outputs and interpretation
 
-| 文件 | 用途 |
-| report.html | 中英语言选择入口 |
-| report_zh.html | 中文报告；净值、回撤、分期指标、参数和限制说明，图表内嵌 |
-| report_en.html | 英文报告；与中文版共用同一份计算结果 |
-| metrics.csv | 各策略的全期、开发期及留出期标量绩效 |
-| schedule.csv | 信号日与执行日，检查时间顺序 |
-| target_weights.csv | 每次调仓目标权重 |
-| <strategy>_daily.csv | 各策略的逐日账本标量字段 |
-| results.json | 完整结构化结果，包括持仓及交易详情 |
-| manifest.json | 输入、源码、输出文件哈希及运行环境，用于核对同一次实验 |
-| demo_prices.csv | 仅 demo 生成；保存本次合成输入，便于重跑 |
+| File | Purpose |
+| report.html | Default English entry, with a Chinese language switch |
+| report_zh.html | Chinese report with embedded NAV/drawdown charts, period metrics, parameters, and limitations |
+| report_en.html | English report using the same computed results as the Chinese version |
+| metrics.csv | Scalar performance metrics for full, development, and holdout periods |
+| schedule.csv | Signal and execution dates for inspecting timing |
+| target_weights.csv | Target weights at each rebalance |
+| <strategy>_daily.csv | Scalar fields from each strategy's daily ledger |
+| results.json | Complete structured results, including positions and trade details |
+| manifest.json | Input, source, and output-file hashes plus runtime information for identifying an experiment |
+| demo_prices.csv | Demo only; saves the synthetic input for reruns |
 
-报告及其下载文件位于同一目录。分享完整报告时保留整个输出目录；源码仓库默认不收录 outputs/。哈希用于确认文件身份，不能证明数据真实性或策略有效性。
+Reports and their downloadable files share an output directory. Keep that entire directory when sharing a complete report. The source repository excludes outputs/ by default. Hashes establish file identity, not data authenticity or strategy validity.
 
-先确认数据来源和样本区间，再比较相同区间、成本及初始资金下的策略。CAGR 与波动率采用每年 252 个交易日；最大回撤指标为正的损失幅度，回撤图为非正值；CVaR 使用最差 5% 的日损失。开发期与留出期沿用连续账本，少于 2 个有效日的区间不报告绩效。
+Check the data source and sample interval before comparing strategies under the same period, costs, and starting capital. CAGR and volatility use 252 trading days per year. The maximum-drawdown metric is a positive loss magnitude, while the drawdown chart uses nonpositive values. CVaR uses the worst 5% of daily losses. Development and holdout periods retain a continuous ledger; periods with fewer than two valid days do not report performance.
 
-工程结构与验证
+Structure and validation
 
-quant_research/       统一命令行、报告与个股适配
-sector_backtest/      协方差、组合优化、月度调度、交易与净值核心
-hkquant/             既有因子、排名和原始快照流水线
-configs/             可复用的实验参数
-tests/               输入、时序、公式、账本和回归验证
-docs/                方法说明、指标定义、验证记录与版本路线
-scripts/             源码打包与原 ETF 存档一致性核对
-outputs/             本地运行结果，不进入 Git
+quant_research/       Unified CLI, reporting, and stock adapter
+sector_backtest/      Covariance, optimization, monthly schedule, execution, and NAV
+hkquant/             Existing factor, ranking, and raw-snapshot pipeline
+configs/             Reusable experiment parameters
+tests/               Input, timing, formula, ledger, and regression checks
+docs/                Methodology, factor definitions, validation, and roadmap
+scripts/             Source packaging and original ETF archive comparison
+outputs/             Local results, excluded from Git
 
 python -m unittest discover -s tests -v
 
-CI 安装项目、运行测试并执行两类离线演示。它检查工程可运行性；真实数据复现、独立数据验证和统计推断是不同层次的证据。核心复制来源、第三方算法声明和迁移改动见来源记录 (docs/CORE_PROVENANCE.md)。
+CI installs the project, runs tests, and executes both offline demos. It checks software operation; real-data reproduction, independent data verification, and statistical inference are separate levels of evidence. Core origins, third-party algorithm notices, and migration changes are documented in the provenance record (docs/CORE_PROVENANCE.md).
 
-本地已通过 79 项测试，并在全新虚拟环境验证安装包及两类演示。新 ETF 入口对原存档的 69 次调仓、三策略每日账本和 9 组绩效结果进行核对，观察到数值差异为 0；这只证明迁移计算一致性。详情及可复查命令见验证记录 (docs/VALIDATION.md)。GitHub Actions 已配置，但尚未在远程运行。
+The earlier v0.1 migration validation passed 79 tests and checked the installed package and both demos in a clean virtual environment. The new ETF entry point was compared against the original archive across 69 rebalances, the daily ledgers of three strategies, and nine sets of performance results; the observed numerical difference was zero. This establishes migration consistency only. See the validation record (docs/VALIDATION.md) for details and reproducible commands. GitHub Actions is configured, but a remote run has not been verified.
 
-既有个股原始快照、SQLite 追踪与指标计算入口 main.py 继续保留，操作说明存档于旧流水线 README (docs/LEGACY_PIPELINE.md)。旧 ETF 研究说明 (docs/SECTOR_ETF_README.md)记录原工程历史实验，不是当前统一入口的运行指南。迁移改变了部分源码指纹，新运行不能冒充旧报告的同一份 SHA 验证结果；旧行情数据库和研究报告未包含在此仓库中。
+The existing raw-stock-snapshot, SQLite-tracking, and factor-calculation entry point, main.py, remains available; instructions are archived in the legacy pipeline README (docs/LEGACY_PIPELINE.md). The legacy ETF research notes (docs/SECTOR_ETF_README.md) describe historical experiments in the original project, not the current unified interface. Migration changed some source fingerprints, so a new run cannot claim the same SHA verification identity as an old report. Historical market-data databases and research reports are not bundled in this repository.
 
-常见运行问题
+Troubleshooting
 
-| 情况 | 处理方式 |
-| 输出目录非空 | 换一个新的 --output 路径，保留旧实验 |
-| 标的不匹配、重复行或缺失交易日 | 核对配置与完整价格面板，修正数据源；不要填充虚构行情 |
-| 预热历史不足 | 向前补充历史，覆盖首个信号前的收益窗口、全部因子窗口及连续排名月份 |
-| 有效个股不足 N 只 | 检查因子、月末成交量与月份连续性；当前实现会使整次运行失败 |
-| Top-N 超过仓位约束 | 使 1 / top_n <= max_weight；默认 25% 上限下不能只选 3 只等权 |
-| 协方差不满足正定要求 | 排查重复、常数价格或不足的独立观察；引擎不静默修补矩阵或替换策略 |
+| Symptom | Action |
+| Output directory is not empty | Choose a new --output path to preserve earlier experiments |
+| Ticker mismatch, duplicate rows, or missing sessions | Check the configuration and complete price panel; correct the data source without inventing observations |
+| Insufficient warm-up history | Extend history to cover the initial return window, all factor windows, and consecutive ranking months |
+| Fewer than N eligible stocks | Check factors, month-end volume, and consecutive months; the current implementation fails the entire run |
+| Top-N violates the weight cap | Require 1 / top_n <= max_weight; three equally weighted stocks cannot satisfy the default 25% cap |
+| Covariance is not positive definite | Investigate duplicate or constant prices and insufficient independent observations; the engine does not silently repair the matrix or replace the strategy |
 
-证据边界与版本路线
+Limits and roadmap
 
-当前固定 ETF 和个股样本不代表历史指数成分全集；个股选择可能存在选择偏差和幸存者偏差。提供商的复权历史可能修订，已保存快照也无法恢复未采集过的历史信息版本。因子方向、参数及样本划分若参考过留出结果，后续报告必须披露，不能继续将该区间称为未见测试集。
+The fixed ETF and stock universes do not represent complete historical index membership. Stock selection can introduce selection and survivorship bias. Providers may revise adjusted histories, and saved snapshots cannot recover historical information versions that were never collected. If factor directions, parameters, or sample splits were chosen with knowledge of holdout results, subsequent reports must disclose that use and must not call the interval an unseen test set.
 
-当前不包含盘中数据、新闻／论坛采集、AI 特征或真实交易接口。已完成的本地 ETF 存档一致性核对不替代独立数据核验；后续需补充数据证据和样本外检验，再按路线验收条件 (docs/VERSION_ROADMAP_ZH.md)推进。
+The current version does not include intraday data, news/forum collection, AI features, or live-trading interfaces. The completed local ETF archive comparison does not replace independent data verification. Future work needs additional data evidence and out-of-sample testing before meeting the roadmap acceptance criteria (Chinese) (docs/VERSION_ROADMAP_ZH.md).
 
-| 版本 | 目标决策频率 | 状态 |
-| v0.1 | 月度信号，日度记账 | 已实现，本地候选 |
-| v1.0 | 日度 | 计划 |
-| v2.0 | 小时级 | 计划 |
-| v3.0 | AI 与新闻／论坛辅助的分钟／秒级 | 研究路线 |
+| Version | Target decision frequency | Status |
+| v0.1 | Monthly signals, daily accounting | Existing release |
+| v0.11 | Research validation, eleven sector rankings, portable current-date refresh | Implemented locally |
+| v1.0 | Daily | Planned |
+| v2.0 | Hourly | Planned |
+| v3.0 | AI and news/forum-assisted minute/second decisions | Research roadmap |
 
-更高频版本需要相应的数据、时间戳、撮合及延迟模型，不能仅修改采样参数就视为完成。
+Higher-frequency versions need suitable data, timestamps, execution, and latency models. Changing the sampling parameter alone does not implement them.
 
-研发团队
+Research and development team
 
-本项目由以下四位成员共同研发：
+This project was jointly developed by:
 
 - ChungKit WAN
 - LangCheng LI
 - XinQuan LIU
 - RunAng CAO
 
-许可
+Licensing
 
-项目整体许可证尚未指定。sector_backtest/risk_models.py 中的第三方 BSD 2-clause 声明予以保留，详见来源记录 (docs/CORE_PROVENANCE.md)。
+A project-wide license has not yet been specified. The third-party BSD 2-Clause notice in sector_backtest/risk_models.py is retained; see the provenance record (docs/CORE_PROVENANCE.md).
