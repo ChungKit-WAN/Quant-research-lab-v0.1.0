@@ -26,3 +26,5 @@ jobs:
         run: python -m quant_research demo --output outputs/demo
       - name: Stock synthetic demo
         run: python -m quant_research demo --family stocks --output outputs/stock_demo
+      - name: Current-date sector dashboard and validation demo
+        run: python -m quant_research refresh --demo --output outputs/v011_demo

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quant-research-lab"
-version = "0.1.0"
+version = "0.11.0"
 description = "Monthly sector ETF allocation and stock-factor research with shared portfolio accounting"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -21,3 +21,6 @@ quant-research = "quant_research.__main__:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quant_research*", "sector_backtest*", "hkquant*"]
+
+[tool.setuptools.package-data]
+quant_research = ["default_refresh.json"]

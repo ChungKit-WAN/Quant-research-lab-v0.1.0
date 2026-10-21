@@ -6,25 +6,29 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+sys.path.insert(0, str(ROOT))
+from quant_research import __version__
 
 
 def main():
     files = [ROOT / name for name in (
-        ".gitignore", "README.md", "README_EN.md", "readme.txt", "readme_en.txt",
-        "CHANGELOG.md", "START_HERE_ZH.md", "pyproject.toml",
+        ".gitignore", "README.md", "README_EN.md", "README_ZH.md", "readme.txt", "readme_en.txt", "readme_zh.txt",
+        "CHANGELOG.md", "START_HERE.md", "START_HERE_ZH.md", "pyproject.toml",
         "requirements.txt", "requirements-lock-py313-windows.txt", "config.json",
-        "main.py", "rank_report.py", "setup.ps1",
+        "main.py", "rank_report.py", "setup.ps1", "START_V011.cmd", "START_V011.sh",
     )]
     for folder, suffix in (("quant_research", ".py"), ("sector_backtest", ".py"),
                            ("hkquant", ".py"), ("tests", ".py"), ("scripts", ".py"),
+                           ("scripts", ".ps1"), ("scripts", ".sh"), ("quant_research", ".json"),
                            ("docs", ".md"), ("configs", ".json"), (".github/workflows", ".yml")):
         files.extend(sorted((ROOT / folder).glob("*" + suffix)))
     if not all(path.is_file() for path in files):
         raise ValueError("Missing required source file")
     content = {path.relative_to(ROOT).as_posix(): path.read_bytes() for path in files}
-    manifest = {"version": "0.1.0", "status": "local_candidate_not_published",
+    manifest = {"version": __version__, "status": "local_candidate_not_published",
                 "files_sha256": {name: sha256(data).hexdigest() for name, data in sorted(content.items())}}
-    dest = ROOT / "outputs" / "releases" / "Quant-research-lab-v0.1.0-source.zip"
+    dest = ROOT / "outputs" / "releases" / f"Quant-research-lab-v{__version__}-source.zip"
     dest.parent.mkdir(parents=True, exist_ok=True)
     with ZipFile(dest, "w", compression=ZIP_DEFLATED) as archive:
         for name, data in sorted(content.items()):

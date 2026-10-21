@@ -1,0 +1,26 @@
+{
+  "backtest_years": 5,
+  "warmup_years": 3,
+  "holdout_months": 24,
+  "lookback": 504,
+  "cost_bps": 5.0,
+  "max_weight": 0.25,
+  "top_n": 4,
+  "ranking_window": 3,
+  "group_weights": {"momentum": 0.30, "reversal": 0.10, "risk": 0.40, "liquidity": 0.20},
+  "universe_policy": "Fixed editable research sample; not all stocks or historical index/ETF constituents",
+  "sector_classification": "Manual research grouping, frozen with each run; not historical point-in-time membership",
+  "sectors": [
+    {"id":"XLB","name_zh":"原材料","name_en":"Materials","stocks":[{"ticker":"LIN","name":"Linde"},{"ticker":"APD","name":"Air Products"},{"ticker":"SHW","name":"Sherwin-Williams"},{"ticker":"ECL","name":"Ecolab"},{"ticker":"FCX","name":"Freeport-McMoRan"}]},
+    {"id":"XLC","name_zh":"通信服务","name_en":"Communication Services","stocks":[{"ticker":"GOOGL","name":"Alphabet"},{"ticker":"META","name":"Meta"},{"ticker":"NFLX","name":"Netflix"},{"ticker":"DIS","name":"Walt Disney"},{"ticker":"TMUS","name":"T-Mobile"}]},
+    {"id":"XLE","name_zh":"能源","name_en":"Energy","stocks":[{"ticker":"XOM","name":"Exxon Mobil"},{"ticker":"CVX","name":"Chevron"},{"ticker":"COP","name":"ConocoPhillips"},{"ticker":"SLB","name":"SLB"},{"ticker":"EOG","name":"EOG Resources"}]},
+    {"id":"XLF","name_zh":"金融","name_en":"Financials","stocks":[{"ticker":"JPM","name":"JPMorgan Chase"},{"ticker":"BAC","name":"Bank of America"},{"ticker":"WFC","name":"Wells Fargo"},{"ticker":"GS","name":"Goldman Sachs"},{"ticker":"MS","name":"Morgan Stanley"}]},
+    {"id":"XLI","name_zh":"工业","name_en":"Industrials","stocks":[{"ticker":"CAT","name":"Caterpillar"},{"ticker":"DE","name":"Deere"},{"ticker":"HON","name":"Honeywell"},{"ticker":"UNP","name":"Union Pacific"},{"ticker":"UPS","name":"UPS"}]},
+    {"id":"XLK","name_zh":"信息技术","name_en":"Information Technology","stocks":[{"ticker":"AAPL","name":"Apple"},{"ticker":"MSFT","name":"Microsoft"},{"ticker":"NVDA","name":"NVIDIA"},{"ticker":"AVGO","name":"Broadcom"},{"ticker":"ORCL","name":"Oracle"}]},
+    {"id":"XLP","name_zh":"必需消费","name_en":"Consumer Staples","stocks":[{"ticker":"PG","name":"Procter & Gamble"},{"ticker":"KO","name":"Coca-Cola"},{"ticker":"PEP","name":"PepsiCo"},{"ticker":"WMT","name":"Walmart"},{"ticker":"COST","name":"Costco"}]},
+    {"id":"XLRE","name_zh":"房地产","name_en":"Real Estate","stocks":[{"ticker":"PLD","name":"Prologis"},{"ticker":"AMT","name":"American Tower"},{"ticker":"EQIX","name":"Equinix"},{"ticker":"O","name":"Realty Income"},{"ticker":"SPG","name":"Simon Property"}]},
+    {"id":"XLU","name_zh":"公用事业","name_en":"Utilities","stocks":[{"ticker":"NEE","name":"NextEra Energy"},{"ticker":"DUK","name":"Duke Energy"},{"ticker":"SO","name":"Southern Company"},{"ticker":"AEP","name":"American Electric Power"},{"ticker":"XEL","name":"Xcel Energy"}]},
+    {"id":"XLV","name_zh":"医疗保健","name_en":"Health Care","stocks":[{"ticker":"JNJ","name":"Johnson & Johnson"},{"ticker":"UNH","name":"UnitedHealth"},{"ticker":"ABBV","name":"AbbVie"},{"ticker":"MRK","name":"Merck"},{"ticker":"TMO","name":"Thermo Fisher"}]},
+    {"id":"XLY","name_zh":"可选消费","name_en":"Consumer Discretionary","stocks":[{"ticker":"AMZN","name":"Amazon"},{"ticker":"TSLA","name":"Tesla"},{"ticker":"HD","name":"Home Depot"},{"ticker":"MCD","name":"McDonald's"},{"ticker":"NKE","name":"Nike"}]}
+  ]
+}

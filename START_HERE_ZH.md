@@ -1,4 +1,8 @@
-> 旧版入口指南：当前统一的 ETF／个股回测请先阅读 [主 README](README.md)。本文仅适用于保留的 main.py 指标流水线；目录名是示例占位。
+> English primary guide: [START_HERE.md](START_HERE.md). 点击报告中的 ETF 代码即可进入对应行业个股排名；仅展示配置的研究样本。
+
+> **v0.11 首次使用：解压完整项目后双击 `START_V011.cmd`，自动安装环境、下载行情、按当前时间重新计算并默认打开英文报告，右上角可切换中文。换电脑同样操作。** 详见[便携说明](docs/PORTABLE_V011_ZH.md)和[主 README](README.md)。
+>
+> 下文为保留的 `main.py` 旧版指标流水线说明；v0.11 主入口是 `python -m quant_research refresh --open`。桌面旧 ETF 存档保留，不能与新版入口混用。
 
 # 美股原始数据库 → 因子计算 → 计算结果数据库
 

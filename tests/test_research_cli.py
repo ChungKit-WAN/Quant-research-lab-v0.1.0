@@ -77,11 +77,14 @@ class ResearchCliTests(unittest.TestCase):
         report_files = {"zh-CN": "report_zh.html", "en": "report_en.html"}
         self.assertEqual(self.manifest["report_files"], report_files)
         self.assertEqual(self.results["report_files"], report_files)
-        self.assertEqual(self.manifest["report_languages"], ["zh-CN", "en"])
-        self.assertEqual(self.results["report_languages"], ["zh-CN", "en"])
+        self.assertEqual(self.manifest["report_languages"], ["en", "zh-CN"])
+        self.assertEqual(self.results["report_languages"], ["en", "zh-CN"])
         self.assertEqual(self.results["limitations_bilingual"], self.manifest["limitations_bilingual"])
         self.assertEqual([pair["en"] for pair in self.manifest["limitations_bilingual"]], self.manifest["limitations"])
         entry = (self.demo / "report.html").read_text(encoding="utf-8")
+        self.assertIn('<html lang="en">', entry)
+        self.assertIn('content="0;url=report_en.html"', entry)
+        self.assertLess(entry.index('href="report_en.html"'), entry.index('href="report_zh.html"'))
         reports = {lang: (self.demo / name).read_text(encoding="utf-8")
                    for lang, name in report_files.items()}
         for lang, name in report_files.items():
@@ -96,6 +99,8 @@ class ResearchCliTests(unittest.TestCase):
                         if target:
                             self.assertTrue((self.demo / target).is_file(), target)
         zh_report, en_report = reports["zh-CN"], reports["en"]
+        self.assertNotIn('class="sector-card"', en_report)
+        self.assertNotIn('href="../', en_report)
         self.assertIn("SYNTHETIC DEMO", en_report)
         self.assertNotRegex(en_report, r"[\u3400-\u4dbf\u4e00-\u9fff]")
         for pair in self.manifest["limitations_bilingual"]:

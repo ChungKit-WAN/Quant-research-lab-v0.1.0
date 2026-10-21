@@ -5,6 +5,7 @@ membership. Signal generation is causal, but that alone cannot remove universe
 selection bias, survivorship bias, or retrospective vendor price adjustments.
 """
 
+from dataclasses import dataclass, field, replace
 from numbers import Integral
 
 import numpy as np
@@ -22,26 +23,7 @@ from sector_backtest.pipeline import (
 )
 
 
-def run_factor_monthly(
-    long_prices: pd.DataFrame,
-    config: MonthlyConfig,
-    top_n: int = 4,
-    ranking_window: int = 3,
-    group_weights: dict[str, float] | None = None,
-) -> dict:
-    """Rank complete 65-factor observations and buy equal-weighted top stocks.
-
-    Required input columns are ``date,ticker,open,high,low,close,adj_close,volume``.
-    Prices must cover every configured asset on every XNYS session. Month-end
-    decisions execute at the next session's close through ``evaluate_targets``.
-    No missing prices, factor values, or ranking months are filled. If fewer
-    than ``top_n`` stocks are eligible at any decision, the whole run fails;
-    there is no silent fallback to old holdings, fewer stocks, or cash.
-
-    ``config.lookback`` is the common minimum input-history requirement. Factor
-    windows and the consecutive-month ranking window impose additional history
-    requirements; they are not truncated to that common lookback.
-    """
+def _validate_selection(config, top_n, ranking_window):
     if not isinstance(config, MonthlyConfig):
         raise TypeError("config must be a MonthlyConfig")
     if (isinstance(top_n, bool) or not isinstance(top_n, Integral)
@@ -53,6 +35,21 @@ def run_factor_monthly(
             or ranking_window < 1):
         raise ValueError("ranking_window must be a positive integer")
 
+
+@dataclass
+class _PreparedFactorInputs:
+    config: MonthlyConfig
+    wide: pd.DataFrame
+    schedule: pd.DataFrame
+    history: pd.DataFrame
+    factors: pd.DataFrame
+    rankings: dict = field(default_factory=dict)
+
+
+def _prepare_factor_inputs(long_prices, config):
+    """Private, per-run preparation; no persistent or cross-dataset cache."""
+    if not isinstance(config, MonthlyConfig):
+        raise TypeError("config must be a MonthlyConfig")
     prices = validate_ohlcv(long_prices)
     wide = prices.pivot(index="date", columns="ticker", values="adj_close")
     wide = validate_prices(wide, config)
@@ -66,12 +63,32 @@ def run_factor_monthly(
     last_signal = schedule.iloc[-1].signal
     history = prices.loc[prices.date <= last_signal].copy()
     factors = compute_factors(history)
+    return _PreparedFactorInputs(config, wide, schedule, history, factors)
+
+
+def _run_factor_monthly_prepared(prepared, config, top_n=4, ranking_window=3, group_weights=None):
+    """Reuse validated factors only within one dataset and compatible config.
+
+    Cost changes do not alter signals. The transient ranking cache also keys
+    eligibility count, smoothing and all group weights, so ablations cannot
+    accidentally reuse baseline scores.
+    """
+    _validate_selection(config, top_n, ranking_window)
+    if not isinstance(prepared, _PreparedFactorInputs):
+        raise TypeError("prepared must be internally validated factor inputs")
+    if replace(prepared.config, cost_bps=config.cost_bps) != config:
+        raise ValueError("Prepared inputs can only be reused with the same config apart from cost_bps")
+    wide, schedule, history, factors = prepared.wide, prepared.schedule, prepared.history, prepared.factors
+    last_signal = schedule.iloc[-1].signal
     weights = dict(DEFAULT_WEIGHTS if group_weights is None else group_weights)
-    rankings = build_monthly_rankings(
-        history, factors, as_of=(last_signal.to_period("M") + 1).start_time,
-        weights=weights, ranking_window=ranking_window,
-        min_stocks=max(2, top_n),
-    )
+    cache_key = (int(ranking_window), max(2, top_n), tuple(sorted(weights.items())))
+    if cache_key not in prepared.rankings:
+        prepared.rankings[cache_key] = build_monthly_rankings(
+            history, factors, as_of=(last_signal.to_period("M") + 1).start_time,
+            weights=weights, ranking_window=ranking_window,
+            min_stocks=max(2, top_n),
+        )
+    rankings = prepared.rankings[cache_key]
     targets = {"equal_weight": [], "multifactor_top_n": []}
     signals = []
     for event in schedule.itertuples(index=False):
@@ -132,3 +149,29 @@ def run_factor_monthly(
         ],
     })
     return result
+
+
+def run_factor_monthly(
+    long_prices: pd.DataFrame,
+    config: MonthlyConfig,
+    top_n: int = 4,
+    ranking_window: int = 3,
+    group_weights: dict[str, float] | None = None,
+) -> dict:
+    """Rank complete 65-factor observations and buy equal-weighted top stocks.
+
+    Required input columns are ``date,ticker,open,high,low,close,adj_close,volume``.
+    Prices must cover every configured asset on every XNYS session. Month-end
+    decisions execute at the next session's close through ``evaluate_targets``.
+    No missing prices, factor values, or ranking months are filled. If fewer
+    than ``top_n`` stocks are eligible at any decision, the whole run fails;
+    there is no silent fallback to old holdings, fewer stocks, or cash.
+
+    ``config.lookback`` is the common minimum input-history requirement. Factor
+    windows and the consecutive-month ranking window impose additional history
+    requirements; they are not truncated to that common lookback.
+    """
+    _validate_selection(config, top_n, ranking_window)
+    return _run_factor_monthly_prepared(
+        _prepare_factor_inputs(long_prices, config), config,
+        top_n=top_n, ranking_window=ranking_window, group_weights=group_weights)

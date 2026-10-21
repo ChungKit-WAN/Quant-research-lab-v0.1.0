@@ -1,15 +1,23 @@
 # Changelog
 
-## 0.1.0 — local candidate / 本地候选，尚未发布
+English is primary. [Chinese supplementary history](docs/CHANGELOG_ZH.md).
 
-- 将行业 ETF 风险配置与个股因子选股纳入 `quant_research` 统一命令行。
-- 共用月度信号、下一交易日收盘执行和包含交易成本的日度组合账本。
-- 提供 ETF 三种配置方法，以及基于既有 65 个价格／成交量指标的个股选股适配；其余 35 个财务指标仍未实现。
-- 增加两类确定性合成数据演示、项目安装元数据与 CI 测试流程。
-- 统一入口分别输出 `report_zh.html` 中文报告与 `report_en.html` 英文报告，共用计算结果；`report.html` 提供语言选择。
-- README 分为中文 `README.md` 和英文 `README_EN.md`，另提供 `readme.txt` 与 `readme_en.txt` 两份纯文字版；补充双策略流程、执行时序、默认参数、输出与常见问题。
-- 新增中英方法说明、因子筛选图及 GitHub 手动上传指南；团队只列四位成员姓名，ChungKit WAN 排在首位。
-- 保留旧个股数据流水线和 ETF 核心来源声明，单独保存旧版说明；新报告不替代旧研究证据。
-- 记录 v1.0 日度、v2.0 小时级、v3.0 AI 事件驱动的计划与验收边界。
+## 0.11.0 — 2026-10-21
 
-演示结果只验证程序运行。拟由项目所有者自行上传为公开仓库 `Quant-research-lab`；项目整体许可证尚待确定。尚未确认远程发布，没有创建发布 tag。
+- Add current-date `refresh`: download prices, archive raw and calculated databases, validate exchange sessions and generate ETF, stock and research-validation reports.
+- Show all 100 indicators, including 65 calculated price/volume factors and 35 financial factors awaiting point-in-time data. Support ascending/descending rankings and CSV exports across 11 sector pages and 55 configured stock samples.
+- Make English the default report and documentation language, retaining Chinese companion pages. The overview and both backtest reports provide clickable ETF buttons leading to sector sample-stock rankings; ETF ticker cells in weight tables also link to these pages.
+- Preserve nine predefined cost, holdings-count, ranking-window and factor-group contribution experiments, including failures. Display all calculated scalar performance metrics and per-asset actual weight statistics.
+- Add a Windows launcher with verified downloads and a project-local Python environment keyed to machine and location. Preserve TLS verification and support non-ASCII directories. macOS/Linux scripts remain untested on those platforms.
+- Use completed New York sessions and true exchange-calendar month ends. Failed runs never replace the latest successful report. Retain source, configuration, experiment-plan and artifact hashes.
+
+This uses the requested v0.11 name and incorporates the research-validation scope previously discussed as v0.1.1. This update has not been uploaded to GitHub. Point-in-time financial factors, complete historical membership and independent market-data certification remain future work.
+
+## 0.1.0 — earlier monthly framework
+
+- Combine ETF risk allocation and stock-factor selection under the `quant_research` CLI, using shared monthly signals, next-session execution and daily accounting with transaction costs.
+- Add three ETF allocation methods and stock selection using the existing 65 price/volume factors, deterministic synthetic demos, packaging metadata and CI configuration.
+- Generate separate English/Chinese reports from the same results, with documentation for methods, timing, parameters and reproducibility.
+- Preserve the legacy stock pipeline and ETF core provenance. Describe daily, hourly and AI event-driven versions as future scope.
+
+Synthetic results validate software operation and are not evidence of market performance. Historical reports and source fingerprints are preserved separately.

@@ -1,4 +1,20 @@
-# v0.1.0 本地验证记录
+# Validation record / 本地验证记录
+
+## English-first reports and ETF navigation — 2026-10-21
+
+109 local unit and integration tests passed. Checks cover English default entry points, language-preserving ETF drill-down links, standalone reports without missing parent links, numeric ranking and missing values, escaping, refresh failures and the existing calculation regressions. Reports share the same indicator calculations, strategy parameters and portfolio accounting. A new full refresh is verified separately using the run manifest; existing runs remain unchanged.
+
+The English README and plain-text guide are primary; Chinese companions remain available. Browser screenshot-based visual acceptance has not been completed. Local HTML targets and generated artifact hashes are checked directly.
+
+## v0.11 · 2026-10-21
+
+已通过 105 项本地单元与集成测试，包括升降序数值排序、空值与并列、100 指标覆盖、11 行业中英文链接、HTML 注入防护、动态日期与跨时区月末、失败下载保留证据、验证失败不发布成功结果、预定义实验与连续账本。Windows 全新独立 Python 3.13.9 环境安装已验证。macOS/Linux 脚本尚未实机运行；本次 GitHub CI 尚未执行。
+
+网络实际运行的证据以每次 `outputs/v011/runs/<运行编号>/manifest.json` 的 status、source、数据截止日和哈希为准。失败批次保留，不能用失败批次宣称完成。合成演示与真实行情分别标记；内部价格抽样和交易日校验不构成独立数据认证。
+
+Windows 便携启动器端到端成功批次：`20261021-164530-3dea4812`。55 只个股及 11 只 ETF 下载完成；数据末日 2026-10-20，月度排名 2026-09-30。9 组实验全部完成，22 个行业语言页面链接检查通过，68 个报告工件 SHA-256 检查一致。先前联调失败批次保留于本地，未被提升为成功结果。
+
+## v0.1.0 历史本地记录
 
 验证日期：2026-10-20。当前是本地发布候选，未上传 GitHub，未创建 release/tag；远程 CI 尚未运行。
 

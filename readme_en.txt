@@ -6,11 +6,27 @@ Developed collaboratively by a four-member team.
 
 We study how covariance estimation affects sector ETF allocation and how price/volume factor rankings affect stock portfolios. Both strategy families use the same rebalancing, transaction-cost, and portfolio-accounting conventions, making methodological differences easier to examine. Engineering reproducibility and predictive performance are evaluated separately.
 
-Current version: v0.1.0 local release candidate. Daily decisions in v1.0, hourly decisions in v2.0, and AI-assisted minute/second decisions in v3.0 are future work described in the version roadmap (Chinese) (docs/VERSION_ROADMAP_ZH.md), not implemented capabilities.
+Current version: v0.11 (package version 0.11.0). This includes the research-validation milestone previously discussed as v0.1.1, eleven sector pages and portable refresh. Daily decisions in v1.0, hourly decisions in v2.0, and AI-assisted minute/second decisions in v3.0 remain future work in the version roadmap (docs/VERSION_ROADMAP.md).
 
-Language: 中文 (README.md) · English (README_EN.md)
+One-click reports on a new computer
 
-Reading guide: English plain text (readme_en.txt) · Methodology (docs/METHODOLOGY.md) · Factor catalog (docs/FACTOR_CATALOG.md) · Validation (docs/VALIDATION.md) · Roadmap (Chinese) (docs/VERSION_ROADMAP_ZH.md) · Upload guide (Chinese) (docs/GITHUB_UPLOAD_ZH.md)
+English is the primary language for the interface, reports, code identifiers, CLI messages and documentation. Chinese companion reports remain available from the language switch. On the overview, ETF backtest or stock backtest page, click an ETF such as XLK to open its sector stock rankings. The linked page shows the configured research sample; it does not claim to contain the fund’s complete or historical holdings.
+
+On Windows, extract the source bundle and double-click START_V011.cmd. It verifies the bootstrap download, installs project-local Python and dependencies, downloads current prices, recalculates all reports, and opens the result. It does not depend on the original computer's environment. Internet access to the official software sources and Yahoo is required; errors retain logs and never count as a successful refresh. macOS/Linux have bash START_V011.sh, authored but not tested on those operating systems.
+
+- Overview and eleven sector pages, with five editable sample stocks per sector (55 total). This is not the whole market or historical index membership.
+- All 100 factor definitions, formulas, directions and status fields are visible. The 65 price/volume factors have calculated values; 35 financial factors remain unavailable pending point-in-time fundamentals. Sort any metric ascending or descending; missing values are always last and unranked. Display sorting does not change the strategy.
+- English dashboards with Chinese companions, ETF/stock backtests and validation reports, with CSV/JSON exports. All computed performance metrics and asset weight statistics appear in the backtest reports.
+- Each launch resolves the clock again: five research years, three earlier warmup years and a trailing 24-month chronological holdout. Only completed New York sessions plus a two-hour data-source buffer are used; rankings use fully completed exchange-calendar months.
+- Nine predefined experiments cover 5/10/20 bp costs, holdings count, ranking windows and removal of each factor group's score contribution. Every success and failure is saved. A chronological holdout is not certified unseen data.
+
+Edit configs/refresh.json to change the sample and windows. Each run is preserved in outputs/v011/runs/<run-id>/; outputs/v011/report.html points to the latest fully successful run. Raw source tables, SQLite batches, price samples, calendar coverage, experiment plans and SHA-256 hashes are retained. This downloads prices and generates research reports; it does not download company annual reports or SEC filing text.
+
+With Python installed, run python -m quant_research refresh --open. Optional --as-of YYYY-MM-DD reproduces a historical cutoff; omitting it uses the current clock. Explicit offline demonstrations use refresh --demo --output outputs/v011_demo and are labelled synthetic. refresh --prices path.csv requires all configured stocks and eleven ETFs. See the portable guide (docs/PORTABLE_V011.md).
+
+Language: English (primary) · 中文辅助 (README_ZH.md)
+
+Reading guide: Quick start (START_HERE.md) · English plain text (readme.txt) · Methodology (docs/METHODOLOGY.md) · Factor catalog (docs/FACTOR_CATALOG.md) · Validation (docs/VALIDATION.md) · Roadmap (docs/VERSION_ROADMAP.md) · GitHub upgrade guide (docs/GITHUB_UPDATE_V011.md)
 
 Implemented scope
 
@@ -20,7 +36,7 @@ Implemented scope
 
 The ETF family compares equal_weight, sample_min_variance, and shrinkage_min_variance. Its default universe is XLB, XLC, XLE, XLF, XLI, XLK, XLP, XLRE, XLU, XLV, XLY.
 
-The stock family compares equal_weight across the configured universe with multifactor_top_n, which equally weights the top N stocks. Its default universe is AAPL, MSFT, GOOGL, AMZN, NVDA, META, JPM, JNJ, XOM, PG. This is a fixed research universe, not historical index membership. Both strategies rebalance monthly and incur transaction costs.
+The stock family compares equal_weight across the configured universe with multifactor_top_n, which equally weights the top N stocks. The v0.11 refresh uses 55 sample stocks. The older demo/run --family stocks keeps the ten-stock example AAPL, MSFT, GOOGL, AMZN, NVDA, META, JPM, JNJ, XOM, PG. These are fixed research samples, not historical index membership. Both strategies rebalance monthly and incur transaction costs. The fixed dates in the manual configurations below apply to demo/run; refresh derives dates from its rolling-window settings.
 
 The factor catalog contains 100 candidates, of which 65 are implemented: 20 momentum, 10 reversal, 15 risk, and 20 liquidity factors. The remaining 35 candidates—15 value, 10 quality, and 10 growth factors—require financial data with historical availability timestamps. They are not implemented and are not replaced with zeros. See the factor catalog (docs/FACTOR_CATALOG.md). Factor directions and group weights are hypotheses to test; the number of factors does not establish predictive value.
 
@@ -40,7 +56,7 @@ Shared workflow:
 5. Feed both branches into the common target-weight interface
 6. Apply the shared positions, cash, and cost ledger
 7. Compute daily NAV and period metrics
-8. Export separate Chinese/English reports, CSV, JSON, and the hash manifest
+8. Export English reports with Chinese companions, CSV, JSON, and the hash manifest
 
 Both research branches feed target weights into evaluate_targets, sharing execution and accounting. Monthly decisions still use daily observations.
 
@@ -66,7 +82,7 @@ In later examples, python means the interpreter in this environment. You can kee
 
 Both demos generate deterministic synthetic prices locally. Open the printed report.html path in a browser to view the results. The output directory must be new or empty to preserve earlier experiments. Each demo saves demo_prices.csv, which can be passed to run --prices; it remains synthetic data. Synthetic results validate the software pipeline and are not evidence of market performance, strategy effectiveness, or investment returns.
 
-The unified interface generates a Chinese report, report_zh.html, and an English report, report_en.html, with localized headings, charts, tables, metric explanations, methodology, and evidence limitations. report.html is the language-selection page. Both reports use the same computed results; CSV and JSON field names remain in English for programmatic use.
+The unified interface generates a Chinese report, report_zh.html, and an English report, report_en.html, with localized headings, charts, tables, metric explanations, methodology, and evidence limitations. report.html opens the English report by default; use the language link to switch to Chinese. Both reports use the same computed results; CSV and JSON field names remain in English for programmatic use.
 
 The validated Windows/Python 3.13 dependency snapshot is in requirements-lock-py313-windows.txt. To reproduce that environment, run python -m pip install -r requirements-lock-py313-windows.txt, then python -m pip install . --no-deps. Other platforms require their own validation. The standard installation above is also supported.
 
@@ -124,7 +140,7 @@ See the methodology (docs/METHODOLOGY.md) for the cost equation, minimum-varianc
 Outputs and interpretation
 
 | File | Purpose |
-| report.html | Chinese/English language-selection page |
+| report.html | Default English entry, with a Chinese language switch |
 | report_zh.html | Chinese report with embedded NAV/drawdown charts, period metrics, parameters, and limitations |
 | report_en.html | English report using the same computed results as the Chinese version |
 | metrics.csv | Scalar performance metrics for full, development, and holdout periods |
@@ -154,7 +170,7 @@ python -m unittest discover -s tests -v
 
 CI installs the project, runs tests, and executes both offline demos. It checks software operation; real-data reproduction, independent data verification, and statistical inference are separate levels of evidence. Core origins, third-party algorithm notices, and migration changes are documented in the provenance record (docs/CORE_PROVENANCE.md).
 
-Local validation passed 79 tests and checked the installed package and both demos in a clean virtual environment. The new ETF entry point was compared against the original archive across 69 rebalances, the daily ledgers of three strategies, and nine sets of performance results; the observed numerical difference was zero. This establishes migration consistency only. See the validation record (docs/VALIDATION.md) for details and reproducible commands. GitHub Actions is configured, but a remote run has not been verified.
+The earlier v0.1 migration validation passed 79 tests and checked the installed package and both demos in a clean virtual environment. The new ETF entry point was compared against the original archive across 69 rebalances, the daily ledgers of three strategies, and nine sets of performance results; the observed numerical difference was zero. This establishes migration consistency only. See the validation record (docs/VALIDATION.md) for details and reproducible commands. GitHub Actions is configured, but a remote run has not been verified.
 
 The existing raw-stock-snapshot, SQLite-tracking, and factor-calculation entry point, main.py, remains available; instructions are archived in the legacy pipeline README (docs/LEGACY_PIPELINE.md). The legacy ETF research notes (docs/SECTOR_ETF_README.md) describe historical experiments in the original project, not the current unified interface. Migration changed some source fingerprints, so a new run cannot claim the same SHA verification identity as an old report. Historical market-data databases and research reports are not bundled in this repository.
 
@@ -175,7 +191,8 @@ The fixed ETF and stock universes do not represent complete historical index mem
 The current version does not include intraday data, news/forum collection, AI features, or live-trading interfaces. The completed local ETF archive comparison does not replace independent data verification. Future work needs additional data evidence and out-of-sample testing before meeting the roadmap acceptance criteria (Chinese) (docs/VERSION_ROADMAP_ZH.md).
 
 | Version | Target decision frequency | Status |
-| v0.1 | Monthly signals, daily accounting | Implemented; local release candidate |
+| v0.1 | Monthly signals, daily accounting | Existing release |
+| v0.11 | Research validation, eleven sector rankings, portable current-date refresh | Implemented locally |
 | v1.0 | Daily | Planned |
 | v2.0 | Hourly | Planned |
 | v3.0 | AI and news/forum-assisted minute/second decisions | Research roadmap |
